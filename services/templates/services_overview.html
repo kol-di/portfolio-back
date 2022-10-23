@@ -3,3 +3,22 @@
 {% block title %}
     <h1>Services overview</h1>
 {% endblock %}
+
+{% block content %}
+    <a href="{% url 'services:all-projects' %}">View all out projects</a>
+
+    {% for service in services%}
+        <li>
+            <h1>{{ service.name }}</h1>
+            {% for  technology in service.technologies%}
+                <li>
+                    <a href="{% url 'services:technology' tech_id=technology.id %}"><h3>{{ technology.name }}</h3></a>
+                    {% for subtech in technology.sub_technologies %}
+                        <p>{{ subtech.name }}</p>
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </li>
+    {% endfor %}
+    {{ data }}
+{%  endblock %}

@@ -1,11 +1,11 @@
-{% extends "services_overview.html" %}
+{% extends "base.html" %}
+
+{% block title %}
+    Service
+{% endblock %}
 
 
 {% block content%}
-    {% for name in names %}
-{#        <a href="{% url 'services:service' service_name=name %}"><li>{{ name }}</li></a>#}
-        <li>{{ name }}</li>
-    {% endfor %}
 
     <div id="keywords"></div>
 
@@ -49,11 +49,11 @@
             }
 
             loadMore() {
-                getData("{% url 'services:listing-api' %}", this.pageIndex, this.perPage)
+                getData("{% url 'services:technology-api' tech_id=tech_id%}", this.pageIndex, this.perPage)
                     .then(response => {
                         response.data.forEach((el) => {
                             this.addElement(el.name)
-                            this.addElement(el.technologies.name)
+                            {#this.addElement(el.img)#}
                         });
                         this.next.style.display = !response.has_next ? "none" : "inline-block"
                     });
@@ -65,4 +65,6 @@
     {% endblock %}
 
 {% endblock %}
+
+
 
