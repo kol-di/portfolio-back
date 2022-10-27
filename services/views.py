@@ -2,53 +2,65 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.core.cache import cache
+from django.views.generic import DetailView, ListView
 
 from .models import Service, Technology, Project
 
 
-def technology_api(request, tech_id):
-    page_number = request.GET.get('page', 1)
-    per_page = 1
+class TechnologyView(DetailView):
+    template_name = 'technology.html'
+    model = Technology
 
-    from django.db import connection
+    context_object_name = 'tech'
+    pk_url_kwarg = 'tech_id'
 
-    tech = cache.get(f'technology{tech_id}')
-    if tech is None:
+    def get_context_data(self, *args, **kwargs):
+        from django.db import connection
+
+        response = super().get_context_data(*args, **kwargs)['tech']
+
+        context = {
+            'tech_id': response.id,
+            'name': response.name,
+            'text': response.text,
+            'subtechnologies': [*response.subtechnologies.values_list('name', flat=True)]
+        }
+
+        print('Technology', len(connection.queries))
+
+        return context
+
+
+class JsonResponseMixin:
+    def render_to_json_response(self, context, **response_kwargs):
+        print(context)
+        data = [{
+            'name': project.name,
+            'id': project.id,
+            'img': project.get_technology_pic_url
+        } for project in context['project_list']]
+
+        has_next = context['page_obj'].has_next()
+
+        context = {
+            'has_next': has_next,
+            'data': data
+        }
+        return JsonResponse(context, safe=False)
+
+
+class TechnologyApiView(JsonResponseMixin, ListView):
+    model = Technology
+    paginate_by = 1
+    pk_url_kwarg = 'tech_id'
+
+    def get_queryset(self):
+        tech_id = self.kwargs[self.pk_url_kwarg]
         tech = Technology.objects.get(pk=tech_id)
-        cache.set(f'technology{tech_id}', tech, 60 * 15)
+        return tech.project_set.order_by('id').all()
 
-    print('TEchnology API', len(connection.queries))
-    paginator = Paginator(tech.project_set.order_by('id').all(), per_page)
-    page_obj = paginator.get_page(page_number)
-    print('TEchnology API', len(connection.queries))
-
-    data = [{'name': project.name,
-             'id': project.id,
-             'img': project.get_technology_pic_url
-             } for project in page_obj.object_list]
-
-    print('TEchnology API', len(connection.queries))
-
-    payload = {
-        'has_next': page_obj.has_next(),
-        'data': data
-    }
-    return JsonResponse(payload)
-
-
-def technology(request, tech_id):
-    from django.db import connection
-    tech = Technology.objects.get(pk=tech_id)
-
-    context = {
-        'tech_id': tech_id,
-        'name': tech.name,
-        'text': tech.text,
-        'subtechnologies': [*tech.subtechnologies.values_list('name', flat=True)]
-    }
-
-    print('Technology', len(connection.queries))
-    return render(request, 'technology.html', context)
+    def render_to_response(self, context, **response_kwargs):
+        return self.render_to_json_response(context, **response_kwargs)
 
 
 def services_overview(request):
