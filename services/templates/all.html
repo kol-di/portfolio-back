@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    All services
+    All projects
 {% endblock %}
 
 {% block content%}
@@ -52,6 +52,8 @@
                     .then(response => {
                         response.data.forEach((el) => {
                             this.addElement(el.name)
+                            this.addElement(el.id)
+                            this.addElement(el.img)
                             {#this.addElement(el.img)#}
                         });
                         this.next.style.display = !response.has_next ? "none" : "inline-block"

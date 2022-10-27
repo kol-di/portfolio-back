@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Service
+    <h1>Technology</h1>
+    <h3>{{ name }}</h3>
+    <h3>{{ text }}</h3>
+    <h3>{{ subtechnologies }}</h3>
 {% endblock %}
 
 
 {% block content%}
+{#    {% for el in data %}#}
+{#        {{el.img}}#}
+{#        <img src="{{el.img}}" style="width: 20%; height: 20%;" alt="{{el.img}}">#}
+{#    {% endfor %}#}
 
     <div id="keywords"></div>
 
@@ -53,7 +60,8 @@
                     .then(response => {
                         response.data.forEach((el) => {
                             this.addElement(el.name)
-                            {#this.addElement(el.img)#}
+                            this.addElement(el.id)
+                            this.addElement(el.img)
                         });
                         this.next.style.display = !response.has_next ? "none" : "inline-block"
                     });
