@@ -50,13 +50,13 @@
             loadMore() {
                 getData("{% url 'services:all-projects-api' %}", this.pageIndex, this.perPage)
                     .then(response => {
-                        response.data.forEach((el) => {
+                        response.results.forEach((el) => {
                             this.addElement(el.name)
                             this.addElement(el.id)
-                            this.addElement(el.img)
+                            this.addElement(el.project_img_url)
                             {#this.addElement(el.img)#}
                         });
-                        this.next.style.display = !response.has_next ? "none" : "inline-block"
+                        this.next.style.display = !response.next ? "none" : "inline-block"
                     });
             }
         }

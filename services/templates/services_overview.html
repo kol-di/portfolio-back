@@ -13,7 +13,7 @@
             {% for  technology in service.technologies%}
                 <li>
                     <a href="{% url 'services:technology' tech_id=technology.id %}"><h3>{{ technology.name }}</h3></a>
-                    {% for subtech in technology.sub_technologies %}
+                    {% for subtech in technology.subtechnologies %}
                         <p>{{ subtech.name }}</p>
                     {% endfor %}
                 </li>

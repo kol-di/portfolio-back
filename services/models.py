@@ -7,6 +7,9 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['id']
+
     # @staticmethod
     # def service_name2template(name):
     #     return f'{name}.html'
@@ -19,6 +22,9 @@ class Technology(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['id']
 
 
 class SubTechnology(models.Model):
@@ -40,19 +46,22 @@ class Project(models.Model):
         return self.name
 
     @property
-    def get_project_pic_url(self):
+    def get_project_img_url(self):
         if self.project_pic_link and hasattr(self.project_pic_link, 'url'):
             return self.project_pic_link.url
 
     @property
-    def get_technology_pic_url(self):
+    def get_technology_img_url(self):
         if self.technology_pic_link and hasattr(self.technology_pic_link, 'url'):
             return self.technology_pic_link.url
+
+    class Meta:
+        ordering = ['id']
 
 
 class ProjectTool(models.Model):
     name = models.CharField(max_length=200)
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, related_name='project_tools')
 
     def __str__(self):
         return self.name
