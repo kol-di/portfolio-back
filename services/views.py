@@ -1,11 +1,10 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.generic import DetailView, ListView
 from rest_framework import generics, serializers
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 from .models import Service, Technology, Project, SubTechnology
 
@@ -25,63 +24,17 @@ class ProjectSerializer(serializers.ModelSerializer):
         return obj.get_project_img_url
 
     def _get_alternate_tech_img(self, obj):
-        return getattr(obj, 'get_technology_img_url', None)
+        return obj.get_technology_img_url
 
 
-class JsonResponseMixin:
-    @staticmethod
-    def render_to_json_response(context, **response_kwargs):
-        print(context)
-        data = [{
-            'name': project.name,
-            'id': project.id,
-            'img': project.get_technology_pic_url
-        } for project in context['project_list']]
-
-        has_next = context['page_obj'].has_next()
-
-        context = {
-            'has_next': has_next,
-            'data': data
-        }
-        return JsonResponse(context, safe=False)
+class AllProjectsSerializer(ProjectSerializer):
+    class Meta(ProjectSerializer.Meta):
+        fields = ['id', 'name', 'project_img_url']
 
 
-class TechnologyView(DetailView):
-    template_name = 'technology.html'
-    model = Technology
-
-    context_object_name = 'tech'
-    pk_url_kwarg = 'tech_id'
-
-    def get_context_data(self, *args, **kwargs):
-        from django.db import connection
-
-        response = self.object
-
-        context = {
-            'tech_id': response.id,
-            'name': response.name,
-            'text': response.text,
-            'subtechnologies': [*response.subtechnologies.values_list('name', flat=True)]
-        }
-
-        print('Technology', len(connection.queries))
-
-        return context
-
-
-class TechnologyApiView(JsonResponseMixin, ListView):
-    paginate_by = 1
-    pk_url_kwarg = 'tech_id'
-
-    def get_queryset(self):
-        tech_id = self.kwargs[self.pk_url_kwarg]
-        tech = Technology.objects.get(pk=tech_id)
-        return tech.project_set.order_by('id').all()
-
-    def render_to_response(self, context, **response_kwargs):
-        return self.render_to_json_response(context, **response_kwargs)
+class OverviewProjectSerializer(ProjectSerializer):
+    class Meta(ProjectSerializer.Meta):
+        fields = ['id', 'name', 'text', 'project_img_url', 'project_tools']
 
 
 class SubtechnologySerializer(serializers.ModelSerializer):
@@ -95,7 +48,7 @@ class TechnologySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Technology
-        fields = ['id', 'name', 'subtechnologies']
+        fields = ['id', 'name', 'text', 'subtechnologies']
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -104,6 +57,33 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'name', 'technologies']
+
+
+class TechnologyView(RetrieveAPIView):
+    template_name = 'technology.html'
+    lookup_url_kwarg = 'tech_id'
+    queryset = Technology.objects.all()
+    serializer_class = TechnologySerializer
+
+
+class TechnologyPagination(PageNumberPagination):
+    page_size = 1
+
+
+class TechnologyApiView(ListAPIView):
+    renderer_classes = [JSONRenderer]
+    pagination_class = TechnologyPagination
+    lookup_url_kwarg = 'tech_id'
+    serializer_class = OverviewProjectSerializer
+
+    def get_queryset(self):
+        return Project.objects.filter(technology__id=self.kwargs.get(self.lookup_url_kwarg)).all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class ServicesView(ListAPIView):
@@ -115,12 +95,6 @@ class ServicesView(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response({'services': serializer.data})
-
-
-class AllProjectsSerializer(ProjectSerializer):
-    class Meta:
-        model = Project
-        fields = ['id', 'name', 'project_img_url']
 
 
 class AllProjectsPagination(PageNumberPagination):
@@ -135,14 +109,9 @@ class AllProjectsApiView(ListAPIView):
     queryset = Project.objects.all()
 
 
+@api_view(http_method_names=['GET'])
 def all_projects(request):
     return render(request, 'all.html')
-
-
-class OverviewProjectSerializer(ProjectSerializer):
-    class Meta:
-        model = Project
-        fields = ['id', 'name', 'text', 'project_img_url', 'project_tools']
 
 
 class ProjectView(RetrieveAPIView):

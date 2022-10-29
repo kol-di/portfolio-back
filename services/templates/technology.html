@@ -2,9 +2,11 @@
 
 {% block title %}
     <h1>Technology</h1>
-    <h3>{{ name }}</h3>
-    <h3>{{ text }}</h3>
-    <h3>{{ subtechnologies }}</h3>
+    <h2>{{ name }}</h2>
+    <h2>{{ text }}</h2>
+    {% for subtech in subtechnologies %}
+        <h3>{{ subtech.name }}</h3>
+    {% endfor %}
 {% endblock %}
 
 
@@ -56,14 +58,14 @@
             }
 
             loadMore() {
-                getData("{% url 'services:technology-api' tech_id=tech_id%}", this.pageIndex, this.perPage)
+                getData("{% url 'services:technology-api' tech_id=id%}", this.pageIndex, this.perPage)
                     .then(response => {
-                        response.data.forEach((el) => {
+                        response.results.forEach((el) => {
                             this.addElement(el.name)
                             this.addElement(el.id)
                             this.addElement(el.img)
                         });
-                        this.next.style.display = !response.has_next ? "none" : "inline-block"
+                        this.next.style.display = !response.next ? "none" : "inline-block"
                     });
             }
         }
