@@ -8,7 +8,6 @@ class TechnologyAdmin(admin.ModelAdmin):
 
 
 class ProjectAdmin(admin.ModelAdmin):
-    # raw_id_fields = ("technology", )
     autocomplete_fields = ('technology',)
 
 

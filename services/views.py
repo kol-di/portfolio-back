@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics, serializers, permissions
+from rest_framework import serializers, permissions
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 

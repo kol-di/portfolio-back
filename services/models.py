@@ -10,10 +10,6 @@ class Service(models.Model):
     class Meta:
         ordering = ['id']
 
-    # @staticmethod
-    # def service_name2template(name):
-    #     return f'{name}.html'
-
 
 class Technology(models.Model):
     name = models.CharField(max_length=200, unique=True)
