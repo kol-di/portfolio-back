@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, permissions
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import Service, Technology, Project, SubTechnology
 
@@ -60,6 +60,10 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class TechnologyView(RetrieveAPIView):
+    """
+    Renders base for Technology page "technology.html".
+    Accepts tech_id as a part of url.
+    """
     template_name = 'technology.html'
     lookup_url_kwarg = 'tech_id'
     queryset = Technology.objects.all()
@@ -71,6 +75,15 @@ class TechnologyPagination(PageNumberPagination):
 
 
 class TechnologyApiView(ListAPIView):
+    """
+    Returns paginated responses with projects, related
+    to the given technology.
+
+    Accepts tech_id as a part of url.
+    Accepts "page" url parameter.
+
+    Returns JSON.
+    """
     renderer_classes = [JSONRenderer]
     pagination_class = TechnologyPagination
     lookup_url_kwarg = 'tech_id'
@@ -87,6 +100,9 @@ class TechnologyApiView(ListAPIView):
 
 
 class ServicesView(ListAPIView):
+    """
+    Renders page with all services list "services_overview.html".
+    """
     template_name = 'services_overview.html'
     serializer_class = ServiceSerializer
     queryset = Service.objects.prefetch_related('technologies__subtechnologies')
@@ -102,6 +118,13 @@ class AllProjectsPagination(PageNumberPagination):
 
 
 class AllProjectsApiView(ListAPIView):
+    """
+    Returns paginated results with list of all projects.
+
+    Accept "page" url parameter.
+
+    Returns JSON.
+    """
     pagination_class = AllProjectsPagination
     renderer_classes = [JSONRenderer]
     serializer_class = AllProjectsSerializer
@@ -110,11 +133,20 @@ class AllProjectsApiView(ListAPIView):
 
 
 @api_view(http_method_names=['GET'])
+@permission_classes((permissions.AllowAny, ))
 def all_projects(request):
+    """
+    Renders base for page with all projects "all.html".
+    """
     return render(request, 'all.html')
 
 
 class ProjectView(RetrieveAPIView):
+    """
+    Renders page of a certain project "project.html".
+
+    Accepts "project_id" as a part of url.
+    """
     serializer_class = OverviewProjectSerializer
     queryset = Project.objects.all()
     lookup_url_kwarg = 'project_id'
