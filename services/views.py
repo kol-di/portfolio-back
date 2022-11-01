@@ -29,7 +29,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class AllProjectsSerializer(ProjectSerializer):
     class Meta(ProjectSerializer.Meta):
-        fields = ['id', 'name', 'project_img_url']
+        fields = ['id', 'name', 'technology_img_url']
 
 
 class OverviewProjectSerializer(ProjectSerializer):
@@ -87,7 +87,7 @@ class TechnologyApiView(ListAPIView):
     renderer_classes = [JSONRenderer]
     pagination_class = TechnologyPagination
     lookup_url_kwarg = 'tech_id'
-    serializer_class = OverviewProjectSerializer
+    serializer_class = AllProjectsSerializer
 
     def get_queryset(self):
         return Project.objects.filter(technology__id=self.kwargs.get(self.lookup_url_kwarg)).all()

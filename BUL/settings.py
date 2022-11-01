@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-c@gc%h&1^)h$u2&3yvx0kj^tpx-^-=xs0_p6+wi=b@--k7m)!!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -57,8 +56,7 @@ ROOT_URLCONF = 'BUL.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,8 +81,8 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5437',
+        'HOST': 'postgres_service',
+        'PORT': 5432,
         'OPTIONS': {
             'client_encoding': 'UTF8',
         }
