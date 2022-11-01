@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Project
+{% endblock %}
+
+
+{% block content %}
+    {{project_img_url}}
+    <img src="{{project_img_url}}" style="width: 20%; height: 20%;" alt="{{project_img_url}}">
+    <h1>{{ id }}</h1>
+    <h1>{{ name }}</h1>
+    <h1>{{ project_tools }}</h1>
+    <h1>{{ text }}</h1>
+{% endblock %}
+
+
